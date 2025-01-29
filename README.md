@@ -25,7 +25,6 @@ This app provides a comprehensive solution for displaying daily Namaz timings, d
 *   **Azan and Iqamah Times:** Shows Azan and Iqamah timings for each prayer, allowing users to plan their day effectively.
 *   **Next Prayer Highlight:** Clearly highlights the next upcoming prayer time with a countdown timer, making it easy to stay on schedule.
 *   **Dynamic Data Fetching:** Fetches prayer timings dynamically using the Aladhan API, eliminating the need for manual updates and ensuring accuracy.
-*   **Manual Time Adjustment:** Allows users to manually adjust prayer timings (+/- minutes) to accommodate specific local conditions or preferences.
 *   **MVVM Architecture:** Implemented using the Model-View-ViewModel (MVVM) architectural pattern for maintainable, testable, and scalable code.  This separation of concerns enhances code organization and promotes best practices.
 
 ## Technologies Used
