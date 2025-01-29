@@ -137,14 +137,10 @@ class _PrayerPageState extends State<PrayerPage> {
                                 style: const TextStyle(fontSize: 18, color: Colors.white70),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                'Azan: ${timings.toJson()['${prayer}_azan'] ?? 'Not Available'}',
-                                style: const TextStyle(fontSize: 16, color: Colors.white60),
-                              ),
-                              Text(
-                                'Iqamah: ${timings.toJson()['${prayer}_iqamah'] ?? 'Not Available'}',
-                                style: const TextStyle(fontSize: 16, color: Colors.white60),
-                              ),
+                              Text('Azan: ${timings.toJson()['${prayer}Azan']}'),
+                              Text('Iqamah: ${timings.toJson()['${prayer}Iqamah']}'),
+
+
                             ],
                           ),
                         );

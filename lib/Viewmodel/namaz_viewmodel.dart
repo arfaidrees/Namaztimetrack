@@ -10,22 +10,46 @@ class PrayerViewModel extends GetxController {
     asr: '',
     maghrib: '',
     isha: '',
+    fajrAzan: '',
+    dhuhrAzan: '',
+    asrAzan: '',
+    maghribAzan: '',
+    ishaAzan: '',
+    fajrIqamah: '',
+    dhuhrIqamah: '',
+    asrIqamah: '',
+    maghribIqamah: '',
+    ishaIqamah: '',
   ).obs;
 
   var nextPrayer = ''.obs;
   var countdown = ''.obs;
 
+  /// Fetch prayer timings from API and update prayerTimes
   void fetchTimings(double latitude, double longitude) async {
     try {
       var timings = await PrayerService.fetchPrayerTimings(latitude, longitude);
 
-      // Format prayer times in 12-hour AM/PM format
       prayerTimes.value = NamazTimeModel(
         fajr: _formatTime(timings.fajr),
+        fajrAzan: _formatTime(timings.fajrAzan),
+        fajrIqamah: _formatTime(timings.fajrIqamah),
+
         dhuhr: _formatTime(timings.dhuhr),
+        dhuhrAzan: _formatTime(timings.dhuhrAzan),
+        dhuhrIqamah: _formatTime(timings.dhuhrIqamah),
+
         asr: _formatTime(timings.asr),
+        asrAzan: _formatTime(timings.asrAzan),
+        asrIqamah: _formatTime(timings.asrIqamah),
+
         maghrib: _formatTime(timings.maghrib),
+        maghribAzan: _formatTime(timings.maghribAzan),
+        maghribIqamah: _formatTime(timings.maghribIqamah),
+
         isha: _formatTime(timings.isha),
+        ishaAzan: _formatTime(timings.ishaAzan),
+        ishaIqamah: _formatTime(timings.ishaIqamah),
       );
 
       updateNextPrayer();
@@ -34,6 +58,7 @@ class PrayerViewModel extends GetxController {
     }
   }
 
+  /// Determines the next prayer and calculates countdown
   void updateNextPrayer() {
     final now = DateTime.now();
     final times = {
@@ -53,20 +78,32 @@ class PrayerViewModel extends GetxController {
     }
   }
 
+  /// Calculates time remaining until next prayer
   String _calculateCountdown(DateTime now, DateTime prayerTime) {
     final duration = prayerTime.difference(now);
-    return '${duration.inHours}:${duration.inMinutes.remainder(60)}';
+    return '${duration.inHours}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}';
   }
 
+  /// Formats time from 24-hour to 12-hour format (e.g., 14:30 → 02:30 PM)
   String _formatTime(String time) {
-    final parsedTime = DateFormat('HH:mm').parse(time);
-    return DateFormat('hh:mm a').format(parsedTime);
+    try {
+      final parsedTime = DateFormat('HH:mm').parse(time);
+      return DateFormat('hh:mm a').format(parsedTime);
+    } catch (e) {
+      return time; // Return original if formatting fails
+    }
   }
 
+  /// Parses time string into DateTime for calculations
   DateTime _parseTime(String time) {
-    return DateFormat('hh:mm a').parse(time);
+    try {
+      return DateFormat('hh:mm a').parse(time);
+    } catch (e) {
+      return DateTime.now(); // Fallback to current time if parsing fails
+    }
   }
 
+  /// Adjusts a specific prayer time by given minutes
   void adjustTiming(String prayer, int minutes) {
     final timings = prayerTimes.value;
 
@@ -76,12 +113,23 @@ class PrayerViewModel extends GetxController {
       asr: prayer == 'Asr' ? _adjustTime(timings.asr, minutes) : timings.asr,
       maghrib: prayer == 'Maghrib' ? _adjustTime(timings.maghrib, minutes) : timings.maghrib,
       isha: prayer == 'Isha' ? _adjustTime(timings.isha, minutes) : timings.isha,
+      fajrAzan: timings.fajrAzan,
+      dhuhrAzan: timings.dhuhrAzan,
+      asrAzan: timings.asrAzan,
+      maghribAzan: timings.maghribAzan,
+      ishaAzan: timings.ishaAzan,
+      fajrIqamah: timings.fajrIqamah,
+      dhuhrIqamah: timings.dhuhrIqamah,
+      asrIqamah: timings.asrIqamah,
+      maghribIqamah: timings.maghribIqamah,
+      ishaIqamah: timings.ishaIqamah,
     );
 
     prayerTimes.value = updatedTimings;
     updateNextPrayer();
   }
 
+  /// Adjusts a given time by minutes
   String _adjustTime(String time, int minutes) {
     final parsedTime = _parseTime(time);
     final adjustedTime = parsedTime.add(Duration(minutes: minutes));

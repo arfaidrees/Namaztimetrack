@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:namaz_timings/Views/Screen1.dart';
+import 'package:namaz_timings/Views/Homepage.dart';
 
 import 'package:namaz_timings/main.dart';
 
