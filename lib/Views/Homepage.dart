@@ -12,25 +12,77 @@ class PrayerPage extends StatefulWidget {
 
 class _PrayerPageState extends State<PrayerPage> {
   final PrayerViewModel viewModel = Get.put(PrayerViewModel());
-  String currentTime = '';
   String currentDate = '';
+  String countdown = 'Fetching...';
 
   @override
   void initState() {
     super.initState();
     viewModel.fetchTimings(32.4945, 74.5229);
-    updateTime();
+    updateCountdown();
   }
 
-  void updateTime() {
+  void updateCountdown() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
-      final now = DateTime.now();
       setState(() {
-        currentTime = DateFormat('hh:mm:ss a').format(now);
-        // Format date as day-month (e.g., 29 Jan)
-        currentDate = DateFormat('dd MMM').format(now);
+        currentDate = DateFormat('dd MMM').format(DateTime.now());
+        countdown = findCountdown();
       });
     });
+  }
+
+  /// Finds the countdown to the next upcoming prayer
+  String findCountdown() {
+    final now = DateTime.now();
+    final timings = viewModel.prayerTimes.value;
+
+    if (timings.fajr.isEmpty) return 'Fetching...';
+
+    final Map<String, String> prayers = {
+      'Fajr': timings.fajr,
+      'Dhuhr': timings.dhuhr,
+      'Asr': timings.asr,
+      'Maghrib': timings.maghrib,
+      'Isha': timings.isha,
+    };
+
+    DateTime? nextPrayerTime;
+    String nextPrayerName = 'Fajr';
+
+    for (var entry in prayers.entries) {
+      DateTime prayerTime = parseTime(entry.value);
+      if (prayerTime.isAfter(now)) {
+        nextPrayerTime = prayerTime;
+        nextPrayerName = entry.key;
+        break;
+      }
+    }
+
+    if (nextPrayerTime == null) {
+
+      return 'No upcoming prayers';
+    }
+
+    final difference = nextPrayerTime.difference(now);
+    return formatDuration(difference, nextPrayerName);
+  }
+
+
+  String formatDuration(Duration duration, String prayerName) {
+    String hours = duration.inHours.toString().padLeft(2, '0');
+    String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return '$prayerName in $hours:$minutes:$seconds';
+  }
+
+  DateTime parseTime(String time) {
+    final now = DateTime.now();
+    final format = DateFormat('hh:mm a');
+    try {
+      return format.parse(time).copyWith(year: now.year, month: now.month, day: now.day);
+    } catch (e) {
+      return now;
+    }
   }
 
   @override
@@ -39,22 +91,21 @@ class _PrayerPageState extends State<PrayerPage> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+          // Gradient Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue.shade900, Colors.amber.shade400],
+                colors: [Colors.black, Colors.grey.shade900],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
           ),
-
-
           Obx(() {
             final timings = viewModel.prayerTimes.value;
 
             if (timings.fajr.isEmpty) {
-              return const Center(child: CircularProgressIndicator(color: Colors.white));
+              return const Center(child: CircularProgressIndicator(color: Colors.orangeAccent));
             }
 
             return Column(
@@ -63,85 +114,104 @@ class _PrayerPageState extends State<PrayerPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: const Offset(4, 6),
+                      // Frosted Glass Effect for the Next Prayer Container
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(25),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
                             ),
-                          ],
-                          border: Border.all(color: Colors.white.withOpacity(0.5)),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              currentDate,
-                              style: const TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  countdown,
+                                  style: const TextStyle(
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orangeAccent,
+                                    letterSpacing: 1.5,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 10,
+                                        color: Colors.black26,
+                                        offset: Offset(3, 3),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: Text(
+                                    "$currentDate",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              currentTime,
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+
+                      const SizedBox(height: 25),
                       ...['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.grey.withOpacity(0.2), Colors.white.withOpacity(0.05)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    prayer,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orangeAccent,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    timings.toJson()[prayer] ?? '',
+                                    style: const TextStyle(fontSize: 20, color: Colors.white),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Azan: ${timings.toJson()['${prayer}Azan']}',
+                                          style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                                      Text('Iqamah: ${timings.toJson()['${prayer}Iqamah']}',
+                                          style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: Colors.white.withOpacity(0.3)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                                offset: const Offset(3, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Prayer Name
-                              Text(
-                                prayer,
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                timings.toJson()[prayer] ?? '',
-                                style: const TextStyle(fontSize: 18, color: Colors.white70),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Azan: ${timings.toJson()['${prayer}Azan']}'),
-                              Text('Iqamah: ${timings.toJson()['${prayer}Iqamah']}'),
-
-
-                            ],
                           ),
                         );
                       }).toList(),
