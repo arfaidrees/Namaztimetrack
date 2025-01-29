@@ -60,7 +60,7 @@ class _PrayerPageState extends State<PrayerPage> {
 
     if (nextPrayerTime == null) {
 
-      return 'No upcoming prayers';
+      return 'Not soon';
     }
 
     final difference = nextPrayerTime.difference(now);
@@ -91,7 +91,6 @@ class _PrayerPageState extends State<PrayerPage> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
