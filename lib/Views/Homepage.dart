@@ -113,7 +113,6 @@ class _PrayerPageState extends State<PrayerPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      // Frosted Glass Effect for the Next Prayer Container
                       ClipRRect(
                         borderRadius: BorderRadius.circular(25),
                         child: BackdropFilter(
@@ -181,22 +180,30 @@ class _PrayerPageState extends State<PrayerPage> {
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: Colors.white.withOpacity(0.2)),
                               ),
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8), // Adjust width here
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    prayer,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orangeAccent,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    timings.toJson()[prayer] ?? '',
-                                    style: const TextStyle(fontSize: 20, color: Colors.white),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        prayer,
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orangeAccent,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                      Text(
+                                        timings.toJson()[prayer] ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 8),
                                   Row(
