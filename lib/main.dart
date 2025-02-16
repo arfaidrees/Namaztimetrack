@@ -69,17 +69,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated Logo
                 ScaleTransition(
                   scale: _animation,
                   child: Image.asset(
-                    'assets/logo.png', // Add your app logo here
+                    'assets/logo.png', //logo
                     width: 200,
                     height: 200,
                   ),
                 ),
                 SizedBox(height: 20),
-                // App Name with Fade Animation
                 FadeTransition(
                   opacity: _animation,
                   child: Text(
